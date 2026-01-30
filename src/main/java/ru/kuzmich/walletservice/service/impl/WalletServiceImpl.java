@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
@@ -36,7 +37,7 @@ public class WalletServiceImpl implements WalletService {
   public WalletResponse processOperation(WalletOperationRequest walletOperationRequest) {
     log.debug("Processing operation request for wallet: {}", walletOperationRequest.getWalletId());
 
-    Wallet wallet = walletRepository.findByIdForUpdate(walletOperationRequest.getWalletId())
+    Wallet wallet = walletRepository.findWithLockingById(walletOperationRequest.getWalletId())
         .orElseThrow(() -> new WalletNotFoundException(
             "Wallet not found: " + walletOperationRequest.getWalletId()));
 

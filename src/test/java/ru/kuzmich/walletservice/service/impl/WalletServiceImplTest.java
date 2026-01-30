@@ -44,14 +44,14 @@ class WalletServiceImplTest {
     request.setOperationType(OperationType.DEPOSIT);
     request.setAmount(new BigDecimal("1000.00"));
 
-    when(walletRepository.findByIdForUpdate(testWalletId)).thenThrow(
+    when(walletRepository.findWithLockingById(testWalletId)).thenThrow(
         new OptimisticLockingFailureException("Version conflict"));
 
     OptimisticLockingFailureException exception = assertThrows(
         OptimisticLockingFailureException.class, () -> walletService.processOperation(request));
 
     assertEquals("Version conflict", exception.getMessage());
-    verify(walletRepository, times(1)).findByIdForUpdate(testWalletId);
+    verify(walletRepository, times(1)).findWithLockingById(testWalletId);
     verify(walletRepository, never()).save(any(Wallet.class));
   }
 
@@ -67,7 +67,7 @@ class WalletServiceImplTest {
     Wallet savedWallet = Wallet.builder().id(testWalletId).balance(new BigDecimal("1000.00"))
         .version(1L).build();
 
-    when(walletRepository.findByIdForUpdate(testWalletId)).thenReturn(Optional.of(wallet));
+    when(walletRepository.findWithLockingById(testWalletId)).thenReturn(Optional.of(wallet));
 
     when(walletRepository.save(any(Wallet.class))).thenReturn(savedWallet);
 
@@ -77,7 +77,7 @@ class WalletServiceImplTest {
     assertEquals(testWalletId, response.getWalletId());
     assertEquals(new BigDecimal("1000.00"), response.getBalance());
 
-    verify(walletRepository, times(1)).findByIdForUpdate(testWalletId);
+    verify(walletRepository, times(1)).findWithLockingById(testWalletId);
     verify(walletRepository, times(1)).save(any(Wallet.class));
   }
 
@@ -96,7 +96,7 @@ class WalletServiceImplTest {
         .balance(new BigDecimal("500.00"))  // После снятия 500
         .version(1L).build();
 
-    when(walletRepository.findByIdForUpdate(testWalletId)).thenReturn(Optional.of(wallet));
+    when(walletRepository.findWithLockingById(testWalletId)).thenReturn(Optional.of(wallet));
 
     when(walletRepository.save(any(Wallet.class))).thenReturn(savedWallet);
 
@@ -106,7 +106,7 @@ class WalletServiceImplTest {
     assertEquals(testWalletId, response.getWalletId());
     assertEquals(new BigDecimal("500.00"), response.getBalance());
 
-    verify(walletRepository, times(1)).findByIdForUpdate(testWalletId);
+    verify(walletRepository, times(1)).findWithLockingById(testWalletId);
     verify(walletRepository, times(1)).save(any(Wallet.class));
   }
 
@@ -121,7 +121,7 @@ class WalletServiceImplTest {
         .balance(new BigDecimal("1000.00"))  // На счету только 1000
         .version(0L).build();
 
-    when(walletRepository.findByIdForUpdate(testWalletId)).thenReturn(Optional.of(wallet));
+    when(walletRepository.findWithLockingById(testWalletId)).thenReturn(Optional.of(wallet));
 
     InsufficientFundsException exception = assertThrows(InsufficientFundsException.class,
         () -> walletService.processOperation(request));
@@ -129,7 +129,7 @@ class WalletServiceImplTest {
     assertTrue(exception.getMessage().contains("Insufficient funds"));
     assertTrue(exception.getMessage().contains(testWalletId.toString()));
 
-    verify(walletRepository, times(1)).findByIdForUpdate(testWalletId);
+    verify(walletRepository, times(1)).findWithLockingById(testWalletId);
     verify(walletRepository, never()).save(any(Wallet.class));
   }
 
@@ -140,12 +140,12 @@ class WalletServiceImplTest {
     request.setOperationType(OperationType.DEPOSIT);
     request.setAmount(new BigDecimal("1000.00"));
 
-    when(walletRepository.findByIdForUpdate(testWalletId)).thenReturn(Optional.empty());
+    when(walletRepository.findWithLockingById(testWalletId)).thenReturn(Optional.empty());
 
     assertThrows(ru.kuzmich.walletservice.exception.WalletNotFoundException.class,
         () -> walletService.processOperation(request));
 
-    verify(walletRepository, times(1)).findByIdForUpdate(testWalletId);
+    verify(walletRepository, times(1)).findWithLockingById(testWalletId);
     verify(walletRepository, never()).save(any(Wallet.class));
   }
 
