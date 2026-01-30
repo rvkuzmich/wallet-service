@@ -3,7 +3,6 @@ package ru.kuzmich.walletservice.controller;
 import static ru.kuzmich.walletservice.util.ApplicationConstants.API_VERSION;
 import static ru.kuzmich.walletservice.util.ApplicationConstants.HEALTH_PATH;
 import static ru.kuzmich.walletservice.util.ApplicationConstants.WALLETS_ID_PATH;
-import static ru.kuzmich.walletservice.util.ApplicationConstants.WALLETS_PATH;
 import static ru.kuzmich.walletservice.util.ApplicationConstants.WALLET_ID;
 import static ru.kuzmich.walletservice.util.ApplicationConstants.WALLET_PATH;
 
