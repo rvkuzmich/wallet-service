@@ -10,13 +10,12 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-walletpass}
     volumes:
       - postgres_data:/var/lib/postgresql/data:z
-      - ./init.sql:/docker-entrypoint-initdb.d/init.sql:z
     ports:
       - "${POSTGRES_PORT:-5432}:5432"
     networks:
       - wallet-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U walletuser"]
+      test: ["CMD-SHELL", "pg_isready -d walletdb -U walletuser"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -29,8 +28,10 @@ services:
       SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-walletuser}
       SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-walletpass}
       SPRING_LIQUIBASE_ENABLED: "true"
+      SPRING_JPA_HIBERNATE_DDL_AUTO: validate
+      SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT: org.hibernate.dialect.PostgreSQLDialect
       SERVER_PORT: 8080
-      JAVA_OPTS: "-Xmx512m -Xms256m"
+      JAVA_OPTS: "-Xmx512m -Xms256m -Dspring.profiles.active=docker"
     ports:
       - "${APP_PORT:-8080}:8080"
     depends_on:
