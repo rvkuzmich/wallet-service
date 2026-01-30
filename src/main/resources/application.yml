@@ -20,7 +20,7 @@ spring:
       pool-name: WalletServicePool
 
   liquibase:
-    enabled: ${SPRING_LIQUIBASE_ENABLED:false}  # временно отключите
+    enabled: ${SPRING_LIQUIBASE_ENABLED:true}
     change-log: classpath:db/changelog/db.changelog-master.yaml
     default-schema: public
 
