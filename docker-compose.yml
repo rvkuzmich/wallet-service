@@ -1,0 +1,56 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: wallet-postgres
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-walletdb}
+      POSTGRES_USER: ${POSTGRES_USER:-walletuser}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-walletpass}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    networks:
+      - wallet-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U walletuser"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  wallet-app:
+    build: .
+    container_name: wallet-app
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-walletdb}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-walletuser}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-walletpass}
+      SPRING_LIQUIBASE_ENABLED: "true"
+      SERVER_PORT: 8080
+      JAVA_OPTS: "-Xmx512m -Xms256m"
+    ports:
+      - "${APP_PORT:-8080}:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - wallet-network
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 1G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+
+networks:
+  wallet-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
