@@ -1,0 +1,53 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1
+      author: Roman Kuzmich
+      changes:
+        - createTable:
+            tableName: wallets
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: balance
+                  type: DECIMAL(15,2)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: version
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: TIMESTAMP
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: TIMESTAMP
+                  constraints:
+                    nullable: false
+
+  - changeSet:
+      id: 2
+      author: Roman Kuzmich
+      changes:
+        - createIndex:
+            tableName: wallets
+            indexName: idx_wallets_created_at
+            columns:
+              - column:
+                  name: created_at
+                  descending: true
+
+  - changeSet:
+      id: 3
+      author: Roman Kuzmich
+      changes:
+        - sql:
+            sql: CREATE SEQUENCE IF NOT EXISTS wallet_transaction_seq START WITH 1 INCREMENT BY 50
