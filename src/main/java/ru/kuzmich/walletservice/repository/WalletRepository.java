@@ -1,0 +1,22 @@
+package ru.kuzmich.walletservice.repository;
+
+import jakarta.persistence.LockModeType;
+import java.util.Optional;
+import java.util.UUID;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
+import ru.kuzmich.walletservice.model.Wallet;
+
+@Repository
+public class WalletRepository extends JpaRepository<Wallet, UUID> {
+
+  @Lock(LockModeType.PESSIMISTIC_WRITE)
+  @Query("SELECT w FROM Wallet w WHERE w.id = :id")
+  Optional<Wallet> findByIdForUpdate(@Param("id") UUID id);
+
+  @Lock(LockModeType.PESSIMISTIC_WRITE)
+  Optional<Wallet> findById(UUID id);
+}
