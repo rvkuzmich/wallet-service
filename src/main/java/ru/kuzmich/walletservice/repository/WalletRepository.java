@@ -11,7 +11,7 @@ import org.springframework.stereotype.Repository;
 import ru.kuzmich.walletservice.model.Wallet;
 
 @Repository
-public class WalletRepository extends JpaRepository<Wallet, UUID> {
+public interface WalletRepository extends JpaRepository<Wallet, UUID> {
 
   @Lock(LockModeType.PESSIMISTIC_WRITE)
   @Query("SELECT w FROM Wallet w WHERE w.id = :id")
