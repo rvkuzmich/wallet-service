@@ -1,1 +1,92 @@
-spring.application.name=wallet-service
+spring:
+  application:
+    name: wallet-service
+
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/walletdb}
+    username: ${SPRING_DATASOURCE_USERNAME:walletuser}
+    password: ${SPRING_DATASOURCE_PASSWORD:walletpass}
+    hikari:
+      maximum-pool-size: ${DATASOURCE_MAX_POOL_SIZE:20}
+      minimum-idle: ${DATASOURCE_MIN_IDLE:5}
+      connection-timeout: ${DATASOURCE_CONNECTION_TIMEOUT:30000}
+      validation-timeout: 5000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        jdbc:
+          batch_size: 20
+        order_inserts: true
+        order_updates: true
+        generate_statistics: false
+        connection:
+          handling_mode: DELAYED_ACQUISITION_AND_HOLD
+          provider_disables_autocommit: true
+
+  liquibase:
+    enabled: ${SPRING_LIQUIBASE_ENABLED:true}
+    change-log: classpath:db/changelog/db.changelog-master.yaml
+    default-schema: public
+
+  jackson:
+    default-property-inclusion: non_null
+    serialization:
+      write-dates-as-timestamps: false
+      indent-output: true
+
+server:
+  port: ${SERVER_PORT:8080}
+  tomcat:
+    max-threads: 200
+    min-spare-threads: 10
+    connection-timeout: 30000
+    max-connections: 10000
+    accept-count: 100
+
+  error:
+    include-message: always
+    include-binding-errors: always
+    include-stacktrace: never
+
+logging:
+  level:
+    com.example.wallet: DEBUG
+    org.springframework.retry: INFO
+    org.hibernate.SQL: WARN
+    org.hibernate.type.descriptor.sql.BasicBinder: WARN
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+
+  file:
+    name: logs/wallet-service.log
+  logback:
+    rollingpolicy:
+      max-file-size: 10MB
+      max-history: 30
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,metrics,prometheus
+  metrics:
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true
+  prometheus:
+    metrics:
+      export:
+        enabled: true
+
+spring.retry:
+  max-attempts: 3
+  backoff:
+    delay: 100
+    multiplier: 2
