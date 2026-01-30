@@ -9,8 +9,8 @@ services:
       POSTGRES_USER: ${POSTGRES_USER:-walletuser}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-walletpass}
     volumes:
-      - postgres_data:/var/lib/postgresql/data
-      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+      - postgres_data:/var/lib/postgresql/data:z
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql:z
     ports:
       - "${POSTGRES_PORT:-5432}:5432"
     networks:
