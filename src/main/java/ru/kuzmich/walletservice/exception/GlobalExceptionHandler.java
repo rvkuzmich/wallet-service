@@ -1,5 +1,7 @@
 package ru.kuzmich.walletservice.exception;
 
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import jakarta.validation.ConstraintViolationException;
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -9,7 +11,10 @@ import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.HttpMediaTypeNotAcceptableException;
+import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
@@ -71,22 +76,6 @@ public class GlobalExceptionHandler {
     return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
   }
 
-  @ExceptionHandler(HttpMessageNotReadableException.class)
-  public ResponseEntity<ErrorResponse> handleJsonParseException(
-      HttpMessageNotReadableException ex, WebRequest request) {
-    log.error("JSON parse error: {}", ex.getMessage());
-
-    ErrorResponse error = ErrorResponse.builder()
-        .timestamp(LocalDateTime.now())
-        .status(HttpStatus.BAD_REQUEST.value())
-        .error("Bad Request")
-        .message("Invalid JSON format")
-        .path(request.getDescription(false).replace("uri=", ""))
-        .build();
-
-    return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
-  }
-
   @ExceptionHandler(ConstraintViolationException.class)
   public ResponseEntity<ErrorResponse> handleConstraintViolationException(
       ConstraintViolationException ex, WebRequest request) {
@@ -97,6 +86,31 @@ public class GlobalExceptionHandler {
         .status(HttpStatus.BAD_REQUEST.value())
         .error("Bad Request")
         .message("Constraint violation")
+        .path(request.getDescription(false).replace("uri=", ""))
+        .build();
+
+    return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+  }
+
+  @ExceptionHandler(HttpMessageNotReadableException.class)
+  public ResponseEntity<ErrorResponse> handleHttpMessageNotReadableException(
+      HttpMessageNotReadableException ex, WebRequest request) {
+    log.error("Failed to parse JSON request: {}", ex.getMessage());
+
+    String message = "Invalid JSON format";
+    Throwable rootCause = ex.getRootCause();
+
+    if (rootCause instanceof JsonParseException) {
+      message = "Malformed JSON request";
+    } else if (rootCause instanceof JsonMappingException) {
+      message = "Invalid JSON structure";
+    }
+
+    ErrorResponse error = ErrorResponse.builder()
+        .timestamp(LocalDateTime.now())
+        .status(HttpStatus.BAD_REQUEST.value())
+        .error("Bad Request")
+        .message(message)
         .path(request.getDescription(false).replace("uri=", ""))
         .build();
 
@@ -117,6 +131,54 @@ public class GlobalExceptionHandler {
         .build();
 
     return new ResponseEntity<>(error, HttpStatus.CONFLICT);
+  }
+
+  @ExceptionHandler(HttpMediaTypeNotSupportedException.class)
+  public ResponseEntity<ErrorResponse> handleHttpMediaTypeNotSupportedException(
+      HttpMediaTypeNotSupportedException ex, WebRequest request) {
+    log.error("Unsupported media type: {}", ex.getMessage());
+
+    ErrorResponse error = ErrorResponse.builder()
+        .timestamp(LocalDateTime.now())
+        .status(HttpStatus.UNSUPPORTED_MEDIA_TYPE.value())
+        .error("Unsupported Media Type")
+        .message("Content type '" + ex.getContentType() + "' is not supported")
+        .path(request.getDescription(false).replace("uri=", ""))
+        .build();
+
+    return new ResponseEntity<>(error, HttpStatus.UNSUPPORTED_MEDIA_TYPE);
+  }
+
+  @ExceptionHandler(HttpMediaTypeNotAcceptableException.class)
+  public ResponseEntity<ErrorResponse> handleHttpMediaTypeNotAcceptableException(
+      HttpMediaTypeNotAcceptableException ex, WebRequest request) {
+    log.error("Not acceptable media type: {}", ex.getMessage());
+
+    ErrorResponse error = ErrorResponse.builder()
+        .timestamp(LocalDateTime.now())
+        .status(HttpStatus.NOT_ACCEPTABLE.value())
+        .error("Not Acceptable")
+        .message("Requested media type is not acceptable")
+        .path(request.getDescription(false).replace("uri=", ""))
+        .build();
+
+    return new ResponseEntity<>(error, HttpStatus.NOT_ACCEPTABLE);
+  }
+
+  @ExceptionHandler(MissingServletRequestParameterException.class)
+  public ResponseEntity<ErrorResponse> handleMissingServletRequestParameterException(
+      MissingServletRequestParameterException ex, WebRequest request) {
+    log.error("Missing request parameter: {}", ex.getMessage());
+
+    ErrorResponse error = ErrorResponse.builder()
+        .timestamp(LocalDateTime.now())
+        .status(HttpStatus.BAD_REQUEST.value())
+        .error("Bad Request")
+        .message("Missing required parameter: " + ex.getParameterName())
+        .path(request.getDescription(false).replace("uri=", ""))
+        .build();
+
+    return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
   }
 
   @ExceptionHandler(Exception.class)
