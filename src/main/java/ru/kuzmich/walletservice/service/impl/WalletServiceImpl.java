@@ -3,11 +3,11 @@ package ru.kuzmich.walletservice.service.impl;
 import java.math.BigDecimal;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
-import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import ru.kuzmich.walletservice.dto.WalletOperationRequest;
@@ -20,7 +20,7 @@ import ru.kuzmich.walletservice.repository.WalletRepository;
 import ru.kuzmich.walletservice.service.WalletService;
 
 @Slf4j
-@Setter
+@Service
 @RequiredArgsConstructor
 public class WalletServiceImpl implements WalletService {
 
