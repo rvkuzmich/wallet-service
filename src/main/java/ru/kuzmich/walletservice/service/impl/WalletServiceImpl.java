@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.kuzmich.walletservice.dto.WalletOperationRequest;
 import ru.kuzmich.walletservice.dto.WalletResponse;
 import ru.kuzmich.walletservice.exception.InsufficientFundsException;
+import ru.kuzmich.walletservice.exception.WalletAlreadyExistsException;
 import ru.kuzmich.walletservice.exception.WalletNotFoundException;
 import ru.kuzmich.walletservice.model.OperationType;
 import ru.kuzmich.walletservice.model.Wallet;
@@ -78,7 +79,7 @@ public class WalletServiceImpl implements WalletService {
     log.debug("Creating wallet: {}", walletId);
 
     if (walletRepository.existsById(walletId)) {
-      throw new IllegalArgumentException("Wallet already exists: " + walletId);
+      throw new WalletAlreadyExistsException("Wallet already exists: " + walletId);
     }
 
     Wallet wallet = Wallet.builder()
