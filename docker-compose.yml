@@ -9,7 +9,7 @@ services:
       POSTGRES_USER: ${POSTGRES_USER:-walletuser}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-walletpass}
     volumes:
-      - postgres_data:/var/lib/postgresql/data:z
+      - postgres_data:/var/lib/postgresql/data:Z
     ports:
       - "${POSTGRES_PORT:-5432}:5432"
     networks:
