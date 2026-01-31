@@ -28,7 +28,6 @@ import org.hibernate.annotations.UpdateTimestamp;
 public class Wallet {
 
   @Id
-  @GeneratedValue(strategy = GenerationType.UUID)
   private UUID id;
 
   @Column(name = "balance", nullable = false, precision = 15, scale = 2)
