@@ -89,11 +89,11 @@ class WalletServiceImplTest {
     request.setAmount(new BigDecimal("500.00"));
 
     Wallet wallet = Wallet.builder().id(testWalletId)
-        .balance(new BigDecimal("1000.00"))  // На счету 1000
+        .balance(new BigDecimal("1000.00"))
         .version(0L).build();
 
     Wallet savedWallet = Wallet.builder().id(testWalletId)
-        .balance(new BigDecimal("500.00"))  // После снятия 500
+        .balance(new BigDecimal("500.00"))
         .version(1L).build();
 
     when(walletRepository.findWithLockingById(testWalletId)).thenReturn(Optional.of(wallet));
@@ -115,10 +115,10 @@ class WalletServiceImplTest {
     WalletOperationRequest request = new WalletOperationRequest();
     request.setWalletId(testWalletId);
     request.setOperationType(OperationType.WITHDRAW);
-    request.setAmount(new BigDecimal("1500.00"));  // Пытаемся снять больше, чем есть
+    request.setAmount(new BigDecimal("1500.00"));
 
     Wallet wallet = Wallet.builder().id(testWalletId)
-        .balance(new BigDecimal("1000.00"))  // На счету только 1000
+        .balance(new BigDecimal("1000.00"))
         .version(0L).build();
 
     when(walletRepository.findWithLockingById(testWalletId)).thenReturn(Optional.of(wallet));
