@@ -28,6 +28,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 public class Wallet {
 
   @Id
+  @Column(name = "id",  nullable = false,  updatable = false)
   private UUID id;
 
   @Column(name = "balance", nullable = false, precision = 15, scale = 2)
