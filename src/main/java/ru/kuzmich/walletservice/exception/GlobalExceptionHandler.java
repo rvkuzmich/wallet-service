@@ -3,6 +3,7 @@ package ru.kuzmich.walletservice.exception;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import jakarta.validation.ConstraintViolationException;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
@@ -53,6 +54,23 @@ public class GlobalExceptionHandler {
         .build();
 
     return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+  }
+
+  @ExceptionHandler(WalletAlreadyExistsException.class)
+  public ResponseEntity<ErrorResponse> handleWalletAlreadyExistsException(
+      WalletAlreadyExistsException ex, WebRequest request) {
+
+    log.error("Wallet already exists: {}", ex.getMessage());
+
+    ErrorResponse errorResponse = ErrorResponse.builder()
+        .timestamp(LocalDateTime.now())
+        .status(HttpStatus.BAD_REQUEST.value())
+        .error("Bad Request")
+        .message(ex.getMessage())
+        .path(request.getDescription(false).replace("uri=", ""))
+        .build();
+
+    return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
   }
 
   @ExceptionHandler(MethodArgumentNotValidException.class)
