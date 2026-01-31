@@ -22,6 +22,7 @@ import org.springframework.dao.OptimisticLockingFailureException;
 import ru.kuzmich.walletservice.dto.WalletOperationRequest;
 import ru.kuzmich.walletservice.dto.WalletResponse;
 import ru.kuzmich.walletservice.exception.InsufficientFundsException;
+import ru.kuzmich.walletservice.exception.WalletAlreadyExistsException;
 import ru.kuzmich.walletservice.model.OperationType;
 import ru.kuzmich.walletservice.model.Wallet;
 import ru.kuzmich.walletservice.repository.WalletRepository;
@@ -198,7 +199,7 @@ class WalletServiceImplTest {
   void testCreateWalletAlreadyExists() {
     when(walletRepository.existsById(testWalletId)).thenReturn(true);
 
-    IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+    WalletAlreadyExistsException exception = assertThrows(WalletAlreadyExistsException.class,
         () -> walletService.createWallet(testWalletId));
 
     assertTrue(exception.getMessage().contains("Wallet already exists"));
